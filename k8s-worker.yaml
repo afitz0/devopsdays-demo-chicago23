@@ -1,0 +1,18 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: devopsdays-workers
+spec:
+  selector:
+    matchLabels:
+      app: loyalty
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: loyalty 
+    spec:
+      containers:
+      - name: loyalty
+        image: loyalty:latest
+        imagePullPolicy: Never
