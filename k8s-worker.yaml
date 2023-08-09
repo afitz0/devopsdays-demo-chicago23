@@ -1,18 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  namespace: default
   name: devopsdays-workers
 spec:
   selector:
     matchLabels:
       app: loyalty
-  replicas: 2
+  replicas: 4
   template:
     metadata:
       labels:
         app: loyalty 
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9099"
     spec:
       containers:
       - name: loyalty
-        image: loyalty:latest
+        image: devopsdays/loyalty:latest
         imagePullPolicy: Never

@@ -1,0 +1,13 @@
+deployment.apps/devopsdays-workers created
+deployment.apps/devopsdays-workers configured
+deployment.apps/devopsdays-workers configured
+deployment.apps/devopsdays-workers created
+deployment.apps/devopsdays-workers created
+error: unable to decode "k8s-worker.yaml": json: cannot unmarshal number into Go struct field ObjectMeta.metadata.annotations of type string
+error: unable to decode "k8s-worker.yaml": json: cannot unmarshal number into Go struct field ObjectMeta.metadata.annotations of type string
+error: unable to decode "k8s-worker.yaml": json: cannot unmarshal bool into Go struct field ObjectMeta.metadata.annotations of type string
+error: unable to decode "k8s-worker.yaml": json: cannot unmarshal bool into Go struct field ObjectMeta.metadata.annotations of type string
+deployment.apps/devopsdays-workers configured
+deployment.apps/devopsdays-workers created
+deployment.apps/devopsdays-workers configured
+deployment.apps/devopsdays-workers created
