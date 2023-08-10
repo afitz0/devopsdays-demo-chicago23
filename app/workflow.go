@@ -21,6 +21,7 @@ const (
 	QueryGetGuests            = "getGuests"
 )
 
+// Email strings
 const (
 	emailWelcome            = "Welcome to our loyalty program! You're starting out at '%v' status."
 	emailGuestCanceled      = "Sorry, your guest has already canceled their account."
@@ -45,7 +46,6 @@ func CustomerLoyaltyWorkflow(ctx workflow.Context, customer CustomerInfo, newCus
 	}
 	ctx = workflow.WithActivityOptions(ctx, ao)
 
-	info := workflow.GetInfo(ctx)
 	selector := workflow.NewSelector(ctx)
 	var activities Activities
 	workflowCanceled := false
@@ -128,7 +128,7 @@ func CustomerLoyaltyWorkflow(ctx workflow.Context, customer CustomerInfo, newCus
 	// Block on everything. Continue-As-New on history length; size of activities in this workflow are small enough
 	// that we'll hit the length thresholds well before any size threshold.
 	logger.Info("Waiting for new signals")
-	for customer.AccountActive && info.GetCurrentHistoryLength() < EventsThreshold && !workflowCanceled {
+	for customer.AccountActive && needsReset(ctx) && !workflowCanceled {
 		selector.Select(ctx)
 
 		if errSignal != nil {
@@ -154,22 +154,15 @@ func CustomerLoyaltyWorkflow(ctx workflow.Context, customer CustomerInfo, newCus
 	return nil
 }
 
-// CustomerWorkflowID generates a Workflow ID based on the given customer ID.
-func CustomerWorkflowID(customerID string) string {
-	return "customer-" + customerID
-}
 
 func signalAddPoints(ctx workflow.Context, pointsToAdd int, customer *CustomerInfo) {
 	logger := workflow.GetLogger(ctx)
 	var activities Activities
+	var statusChange int
 
 	logger.Info("Adding points to customer account.", "PointsAdded", pointsToAdd)
 
-	currentStatusOrd := StatusLevelForPoints(customer.LoyaltyPoints).Ordinal
-	customer.LoyaltyPoints += pointsToAdd
-	newStatusOrd := StatusLevelForPoints(customer.LoyaltyPoints).Ordinal
-
-	statusChange := newStatusOrd - currentStatusOrd
+	// TODO increase points
 
 	if statusChange > 0 {
 		err := workflow.ExecuteActivity(ctx, activities.SendEmail,
@@ -251,7 +244,7 @@ func signalCancelAccount(ctx workflow.Context, customer *CustomerInfo) {
 	logger := workflow.GetLogger(ctx)
 	var activities Activities
 
-	customer.AccountActive = false
+	// TODO cancel account
 	err := workflow.ExecuteActivity(ctx, activities.SendEmail, emailCancelAccount).Get(ctx, nil)
 	if err != nil {
 		logger.Error("Error running SendEmail activity for account cancellation.", "Error", err)
@@ -279,4 +272,14 @@ func queryGetGuests(ctx workflow.Context, customer CustomerInfo) ([]string, erro
 
 	logger.Info("Got guest list query.", "Guests", guestIDs)
 	return guestIDs, nil
+}
+
+// CustomerWorkflowID generates a Workflow ID based on the given customer ID.
+func CustomerWorkflowID(customerID string) string {
+	return "customer-" + customerID
+}
+
+func needsReset(ctx workflow.Context) bool {
+  info := workflow.GetInfo(ctx)
+  return info.GetCurrentHistoryLength() >= EventsThreshold
 }
