@@ -7,6 +7,8 @@ MAX_CUSTOMERS_PER_CYCLE=10
 
 DATE_STAMP="date -Iseconds"
 
+export TEMPORAL_ADDRESS="0.0.0.0:7244"
+
 function signalCustomer() {
     workflow=$(temporal workflow list -o json --query "ExecutionStatus = 'Running'" | \
         jq '.[].execution.workflow_id' -r | sort -R | tail -n 1)

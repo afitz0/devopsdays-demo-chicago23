@@ -30,7 +30,7 @@ func main() {
 
 	c, err := client.Dial(client.Options{
 		MetricsHandler: metricsHandler,
-		HostPort:       "host.docker.internal:7233",
+		HostPort:       "host.docker.internal:7244",
 	})
 	if err != nil {
 		logger.Info("Unable to create Temporal client on Docker network. Attempting to fall back to localhost", "Error", err)
